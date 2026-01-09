@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>JADE Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h1>🛡️ JADE</h1>
+                <div class="subtitle">Security Dashboard</div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="#overview" class="nav-item active" data-section="overview">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Overview</span>
+                </a>
+                <a href="#analytics" class="nav-item" data-section="analytics">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Analytics</span>
+                </a>
+                <a href="#threats" class="nav-item" data-section="threats">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Threat Detection</span>
+                </a>
+                <a href="#policies" class="nav-item" data-section="policies">
+                    <i class="fas fa-cog"></i>
+                    <span>Policy Management</span>
+                </a>
+                <a href="#reports" class="nav-item" data-section="reports">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Reports</span>
+                </a>
+                <a href="#settings" class="nav-item" data-section="settings">
+                    <i class="fas fa-sliders-h"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="avatar">J</div>
+                    <div class="user-details">
+                        <div class="username">JADE User</div>
+                        <div class="user-role">Security Admin</div>
+                    </div>
+                </div>
+                <button id="backToPopup" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Popup
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <div class="top-bar-left">
+                    <h2 id="dashboardTitle">Security Overview</h2>
+                    <div class="breadcrumb">
+                        <span>Dashboard</span>
+                        <i class="fas fa-chevron-right"></i>
+                        <span id="currentSection">Overview</span>
+                    </div>
+                </div>
+                
+                <div class="top-bar-right">
+                    <div class="time-display">
+                        <i class="far fa-clock"></i>
+                        <span id="currentTime">Loading...</span>
+                    </div>
+                    <button id="refreshDashboard" class="refresh-btn" title="Refresh">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button id="exportDashboard" class="export-btn" title="Export Report">
+                        <i class="fas fa-download"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dashboard Sections -->
+            <div class="dashboard-sections">
+                <!-- Overview Section -->
+                <section id="overview" class="dashboard-section active">
+                    <!-- Stats Cards -->
+                    <div class="stats-grid">
+                        <div class="stat-card total-blocks">
+                            <div class="stat-icon">
+                                <i class="fas fa-ban"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="totalBlocks">0</div>
+                                <div class="stat-label">Total Blocks</div>
+                                <div class="stat-change">
+                                    <span class="change-positive" id="blocksChange">+0%</span>
+                                    <span> from last week</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card protected-sites">
+                            <div class="stat-icon">
+                                <i class="fas fa-shield-check"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="protectedSites">0</div>
+                                <div class="stat-label">Protected Sites</div>
+                                <div class="stat-change">
+                                    <span class="change-positive" id="sitesChange">+0</span>
+                                    <span> active policies</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card avg-risk">
+                            <div class="stat-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="avgRisk">0%</div>
+                                <div class="stat-label">Avg. Risk Score</div>
+                                <div class="stat-change">
+                                    <span class="change-negative" id="riskChange">-0%</span>
+                                    <span> from average</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card privacy-score">
+                            <div class="stat-icon">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="privacyScore">0%</div>
+                                <div class="stat-label">Privacy Score</div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="privacyProgress"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row -->
+                    <div class="charts-row">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h3>Blocked Requests (24h)</h3>
+                                <div class="chart-legend">
+                                    <span class="legend-item network"><i class="fas fa-circle"></i> Network</span>
+                                    <span class="legend-item storage"><i class="fas fa-circle"></i> Storage</span>
+                                    <span class="legend-item sensors"><i class="fas fa-circle"></i> Sensors</span>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="requestsChart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h3>Risk Distribution</h3>
+                                <div class="chart-controls">
+                                    <select id="riskFilter" class="chart-select">
+                                        <option value="all">All Sites</option>
+                                        <option value="high">High Risk Only</option>
+                                        <option value="medium">Medium Risk</option>
+                                        <option value="low">Low Risk</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="riskChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity & Top Sites -->
+                    <div class="activity-row">
+                        <div class="activity-card">
+                            <div class="card-header">
+                                <h3>Recent Activity</h3>
+                                <button id="clearActivity" class="text-btn">Clear All</button>
+                            </div>
+                            <div class="activity-list" id="activityList">
+                                <div class="activity-empty">Loading activity...</div>
+                            </div>
+                        </div>
+                        
+                        <div class="top-sites-card">
+                            <div class="card-header">
+                                <h3>Top Blocked Sites</h3>
+                                <span class="badge" id="topSitesCount">0 sites</span>
+                            </div>
+                            <div class="top-sites-list" id="topSitesList">
+                                <div class="top-site-empty">No blocked sites yet</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security Tips -->
+                    <div class="tips-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-lightbulb"></i> Security Tips</h3>
+                        </div>
+                        <div class="tips-list">
+                            <div class="tip-item">
+                                <div class="tip-icon success">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <div class="tip-content">
+                                    <h4>Enable Auto-Whitelist</h4>
+                                    <p>Trusted sites will automatically get appropriate permissions.</p>
+                                </div>
+                            </div>
+                            <div class="tip-item">
+                                <div class="tip-icon warning">
+                                    <i class="fas fa-exclamation"></i>
+                                </div>
+                                <div class="tip-content">
+                                    <h4>Review High-Risk Sites</h4>
+                                    <p>Check sites with risk scores above 70% for suspicious activity.</p>
+                                </div>
+                            </div>
+                            <div class="tip-item">
+                                <div class="tip-icon info">
+                                    <i class="fas fa-info"></i>
+                                </div>
+                                <div class="tip-content">
+                                    <h4>Export Your Data</h4>
+                                    <p>Regularly export your policies and logs for backup.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Analytics Section -->
+                <section id="analytics" class="dashboard-section">
+                    <div class="analytics-header">
+                        <h2>Advanced Analytics</h2>
+                        <div class="date-range">
+                            <select id="analyticsRange" class="range-select">
+                                <option value="7">Last 7 days</option>
+                                <option value="30" selected>Last 30 days</option>
+                                <option value="90">Last 90 days</option>
+                                <option value="365">Last year</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="analytics-grid">
+                        <div class="analytics-chart-large">
+                            <div class="chart-header">
+                                <h3>Block Trend Analysis</h3>
+                                <div class="chart-tabs">
+                                    <button class="chart-tab active" data-chart="blocks">Blocks</button>
+                                    <button class="chart-tab" data-chart="risk">Risk Score</button>
+                                    <button class="chart-tab" data-chart="domains">Domains</button>
+                                </div>
+                            </div>
+                            <div class="chart-container-large">
+                                <canvas id="trendChart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="analytics-sidebar">
+                            <div class="analytics-metrics">
+                                <h4>Key Metrics</h4>
+                                <div class="metric-item">
+                                    <div class="metric-label">Peak Blocks/Day</div>
+                                    <div class="metric-value" id="peakBlocks">0</div>
+                                </div>
+                                <div class="metric-item">
+                                    <div class="metric-label">Avg. Risk Trend</div>
+                                    <div class="metric-value trend-positive" id="riskTrend">0%</div>
+                                </div>
+                                <div class="metric-item">
+                                    <div class="metric-label">New Threats</div>
+                                    <div class="metric-value" id="newThreats">0</div>
+                                </div>
+                                <div class="metric-item">
+                                    <div class="metric-label">Most Blocked API</div>
+                                    <div class="metric-value" id="topApi">None</div>
+                                </div>
+                            </div>
+                            
+                            <div class="analytics-insights">
+                                <h4>Insights</h4>
+                                <div class="insight-item" id="insight1">
+                                    <i class="fas fa-chart-line"></i>
+                                    <div class="insight-text">Loading insights...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Threat Detection Section -->
+                <section id="threats" class="dashboard-section">
+                    <div class="threats-header">
+                        <h2>Threat Intelligence</h2>
+                        <div class="threat-stats">
+                            <div class="threat-stat active">
+                                <span class="threat-count" id="activeThreats">0</span>
+                                <span class="threat-label">Active Threats</span>
+                            </div>
+                            <div class="threat-stat blocked">
+                                <span class="threat-count" id="blockedThreats">0</span>
+                                <span class="threat-label">Blocked Today</span>
+                            </div>
+                            <div class="threat-stat detected">
+                                <span class="threat-count" id="detectedThreats">0</span>
+                                <span class="threat-label">Detected</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="threats-grid">
+                        <div class="threat-types">
+                            <h3>Threat Types</h3>
+                            <div class="threat-types-list" id="threatTypesList">
+                                <div class="threat-type-item">
+                                    <div class="threat-type-info">
+                                        <span class="threat-type-name">Tracking Scripts</span>
+                                        <span class="threat-type-count" id="trackingCount">0</span>
+                                    </div>
+                                    <div class="threat-type-bar">
+                                        <div class="threat-type-fill tracking"></div>
+                                    </div>
+                                </div>
+                                <div class="threat-type-item">
+                                    <div class="threat-type-info">
+                                        <span class="threat-type-name">Data Collection</span>
+                                        <span class="threat-type-count" id="dataCollectionCount">0</span>
+                                    </div>
+                                    <div class="threat-type-bar">
+                                        <div class="threat-type-fill data-collection"></div>
+                                    </div>
+                                </div>
+                                <div class="threat-type-item">
+                                    <div class="threat-type-info">
+                                        <span class="threat-type-name">Surveillance</span>
+                                        <span class="threat-type-count" id="surveillanceCount">0</span>
+                                    </div>
+                                    <div class="threat-type-bar">
+                                        <div class="threat-type-fill surveillance"></div>
+                                    </div>
+                                </div>
+                                <div class="threat-type-item">
+                                    <div class="threat-type-info">
+                                        <span class="threat-type-name">Malicious Scripts</span>
+                                        <span class="threat-type-count" id="maliciousCount">0</span>
+                                    </div>
+                                    <div class="threat-type-bar">
+                                        <div class="threat-type-fill malicious"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="threat-detection">
+                            <h3>Real-time Detection</h3>
+                            <div class="detection-status">
+                                <div class="status-indicator active">
+                                    <div class="status-pulse"></div>
+                                    <span>ACTIVE</span>
+                                </div>
+                                <div class="detection-stats">
+                                    <div class="detection-stat">
+                                        <span class="stat-value" id="detectionRate">0%</span>
+                                        <span class="stat-label">Detection Rate</span>
+                                    </div>
+                                    <div class="detection-stat">
+                                        <span class="stat-value" id="falsePositives">0</span>
+                                        <span class="stat-label">False Positives</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="detection-log">
+                                <div class="log-header">
+                                    <h4>Recent Detections</h4>
+                                    <button id="toggleDetection" class="toggle-btn">
+                                        <i class="fas fa-play"></i> Live
+                                    </button>
+                                </div>
+                                <div class="log-list" id="detectionLog">
+                                    <div class="log-empty">Waiting for threats...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Policy Management Section -->
+                <section id="policies" class="dashboard-section">
+                    <div class="policies-header">
+                        <h2>Policy Management</h2>
+                        <div class="policy-actions">
+                            <button id="createPolicy" class="primary-btn">
+                                <i class="fas fa-plus"></i> New Policy
+                            </button>
+                            <button id="importPolicies" class="secondary-btn">
+                                <i class="fas fa-file-import"></i> Import
+                            </button>
+                            <button id="exportPolicies" class="secondary-btn">
+                                <i class="fas fa-file-export"></i> Export
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="policies-filters">
+                        <div class="filter-group">
+                            <input type="text" id="policySearch" placeholder="Search policies..." class="search-input">
+                            <select id="policyFilter" class="filter-select">
+                                <option value="all">All Policies</option>
+                                <option value="whitelisted">Whitelisted</option>
+                                <option value="restricted">Restricted</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                        </div>
+                        <div class="filter-stats">
+                            <span class="stat-badge" id="policyCount">0 policies</span>
+                            <span class="stat-badge success" id="whitelistCount">0 whitelisted</span>
+                            <span class="stat-badge warning" id="restrictedCount">0 restricted</span>
+                        </div>
+                    </div>
+                    
+                    <div class="policies-table-container">
+                        <table class="policies-table" id="policiesTable">
+                            <thead>
+                                <tr>
+                                    <th>Domain</th>
+                                    <th>Risk Score</th>
+                                    <th>Permissions</th>
+                                    <th>Last Updated</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="policiesTableBody">
+                                <tr>
+                                    <td colspan="6" class="table-empty">Loading policies...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Reports Section -->
+                <section id="reports" class="dashboard-section">
+                    <div class="reports-header">
+                        <h2>Security Reports</h2>
+                        <div class="report-controls">
+                            <button id="generateReport" class="primary-btn">
+                                <i class="fas fa-file-pdf"></i> Generate Report
+                            </button>
+                            <button id="scheduleReport" class="secondary-btn">
+                                <i class="far fa-calendar-alt"></i> Schedule
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="reports-grid">
+                        <div class="report-types">
+                            <h3>Report Types</h3>
+                            <div class="report-type-list">
+                                <div class="report-type-item active" data-report="daily">
+                                    <div class="report-type-icon">
+                                        <i class="fas fa-sun"></i>
+                                    </div>
+                                    <div class="report-type-info">
+                                        <h4>Daily Summary</h4>
+                                        <p>24-hour security overview</p>
+                                    </div>
+                                </div>
+                                <div class="report-type-item" data-report="weekly">
+                                    <div class="report-type-icon">
+                                        <i class="fas fa-calendar-week"></i>
+                                    </div>
+                                    <div class="report-type-info">
+                                        <h4>Weekly Analysis</h4>
+                                        <p>Weekly trends and insights</p>
+                                    </div>
+                                </div>
+                                <div class="report-type-item" data-report="monthly">
+                                    <div class="report-type-icon">
+                                        <i class="fas fa-calendar-alt"></i>
+                                    </div>
+                                    <div class="report-type-info">
+                                        <h4>Monthly Report</h4>
+                                        <p>Comprehensive monthly analysis</p>
+                                    </div>
+                                </div>
+                                <div class="report-type-item" data-report="custom">
+                                    <div class="report-type-icon">
+                                        <i class="fas fa-sliders-h"></i>
+                                    </div>
+                                    <div class="report-type-info">
+                                        <h4>Custom Report</h4>
+                                        <p>Generate specific insights</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="report-preview">
+                            <div class="preview-header">
+                                <h3 id="reportPreviewTitle">Daily Summary Report</h3>
+                                <div class="preview-date" id="reportDate">Today</div>
+                            </div>
+                            <div class="preview-content">
+                                <div class="preview-stats">
+                                    <div class="preview-stat">
+                                        <div class="preview-stat-value" id="previewBlocks">0</div>
+                                        <div class="preview-stat-label">Blocks Today</div>
+                                    </div>
+                                    <div class="preview-stat">
+                                        <div class="preview-stat-value" id="previewRisk">0%</div>
+                                        <div class="preview-stat-label">Avg. Risk</div>
+                                    </div>
+                                    <div class="preview-stat">
+                                        <div class="preview-stat-value" id="previewThreats">0</div>
+                                        <div class="preview-stat-label">Threats Detected</div>
+                                    </div>
+                                </div>
+                                <div class="preview-insights">
+                                    <h4>Key Insights</h4>
+                                    <ul id="reportInsights">
+                                        <li>Loading insights...</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Settings Section -->
+                <section id="settings" class="dashboard-section">
+                    <div class="settings-header">
+                        <h2>Dashboard Settings</h2>
+                        <div class="settings-actions">
+                            <button id="saveSettings" class="primary-btn">
+                                <i class="fas fa-save"></i> Save Settings
+                            </button>
+                            <button id="resetSettings" class="secondary-btn">
+                                <i class="fas fa-undo"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-grid">
+                        <div class="settings-category">
+                            <h3><i class="fas fa-chart-line"></i> Dashboard Preferences</h3>
+                            <div class="settings-group">
+                                <div class="setting-item">
+                                    <label class="setting-label">Refresh Interval</label>
+                                    <select id="refreshInterval" class="setting-select">
+                                        <option value="30">30 seconds</option>
+                                        <option value="60" selected>1 minute</option>
+                                        <option value="300">5 minutes</option>
+                                        <option value="600">10 minutes</option>
+                                        <option value="0">Manual only</option>
+                                    </select>
+                                </div>
+                                <div class="setting-item">
+                                    <label class="setting-label">Theme</label>
+                                    <div class="theme-options">
+                                        <label class="theme-option">
+                                            <input type="radio" name="theme" value="light" checked>
+                                            <span class="theme-preview light"></span>
+                                            <span>Light</span>
+                                        </label>
+                                        <label class="theme-option">
+                                            <input type="radio" name="theme" value="dark">
+                                            <span class="theme-preview dark"></span>
+                                            <span>Dark</span>
+                                        </label>
+                                        <label class="theme-option">
+                                            <input type="radio" name="theme" value="auto">
+                                            <span class="theme-preview auto"></span>
+                                            <span>Auto</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="setting-item">
+                                    <label class="setting-label">Notifications</label>
+                                    <div class="checkbox-group">
+                                        <label class="checkbox-item">
+                                            <input type="checkbox" id="notifyThreats" checked>
+                                            <span>New threats detected</span>
+                                        </label>
+                                        <label class="checkbox-item">
+                                            <input type="checkbox" id="notifyHighRisk" checked>
+                                            <span>High-risk sites</span>
+                                        </label>
+                                        <label class="checkbox-item">
+                                            <input type="checkbox" id="notifyWeeklyReport">
+                                            <span>Weekly report ready</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="settings-category">
+                            <h3><i class="fas fa-bell"></i> Alerts Configuration</h3>
+                            <div class="settings-group">
+                                <div class="setting-item">
+                                    <label class="setting-label">Risk Threshold</label>
+                                    <div class="slider-container">
+                                        <input type="range" id="riskThreshold" min="0" max="100" value="70" class="slider">
+                                        <div class="slider-value" id="riskThresholdValue">70%</div>
+                                    </div>
+                                    <div class="setting-desc">Alert when site risk exceeds this value</div>
+                                </div>
+                                <div class="setting-item">
+                                    <label class="setting-label">Alert Methods</label>
+                                    <div class="checkbox-group">
+                                        <label class="checkbox-item">
+                                            <input type="checkbox" id="alertDashboard" checked>
+                                            <span>Dashboard notification</span>
+                                        </label>
+                                        <label class="checkbox-item">
+                                            <input type="checkbox" id="alertSound">
+                                            <span>Sound alert</span>
+                                        </label>
+                                        <label class="checkbox-item">
+                                            <input type="checkbox" id="alertBadge">
+                                            <span>Extension badge</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="settings-category">
+                            <h3><i class="fas fa-database"></i> Data Management</h3>
+                            <div class="settings-group">
+                                <div class="setting-item">
+                                    <label class="setting-label">Data Retention</label>
+                                    <select id="dataRetention" class="setting-select">
+                                        <option value="7">7 days</option>
+                                        <option value="30" selected>30 days</option>
+                                        <option value="90">90 days</option>
+                                        <option value="365">1 year</option>
+                                        <option value="0">Forever</option>
+                                    </select>
+                                </div>
+                                <div class="setting-item">
+                                    <label class="setting-label">Auto Backup</label>
+                                    <div class="checkbox-group">
+                                        <label class="checkbox-item">
+                                            <input type="checkbox" id="autoBackup" checked>
+                                            <span>Enable automatic backups</span>
+                                        </label>
+                                        <div class="backup-frequency" id="backupFrequency">
+                                            <select id="backupInterval" class="small-select">
+                                                <option value="daily">Daily</option>
+                                                <option value="weekly" selected>Weekly</option>
+                                                <option value="monthly">Monthly</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="setting-item">
+                                    <div class="data-actions">
+                                        <button id="clearAllData" class="danger-btn">
+                                            <i class="fas fa-trash"></i> Clear All Data
+                                        </button>
+                                        <button id="exportAllData" class="secondary-btn">
+                                            <i class="fas fa-download"></i> Export All
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Footer -->
+            <footer class="dashboard-footer">
+                <div class="footer-left">
+                    <span>JADE Dashboard v1.0</span>
+                    <span class="footer-separator">•</span>
+                    <span id="lastUpdated">Last updated: Just now</span>
+                </div>
+                <div class="footer-right">
+                    <span id="memoryUsage">Memory: 0MB</span>
+                    <span class="footer-separator">•</span>
+                    <span id="extensionVersion">Extension: v1.0.0</span>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+</html>
