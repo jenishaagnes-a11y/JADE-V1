@@ -1,1 +1,1 @@
-# JADE-V1
+# JADE
